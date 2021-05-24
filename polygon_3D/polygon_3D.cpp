@@ -1,3 +1,11 @@
+/******************************************************************************
+    * File: polygon_3D.cpp
+    * Description: Manipulation of polygon in 3D space.
+    * Created: 24 may 2021
+    * Author: Kseniya Nosulko
+    * Email: knosulko@gmail.com
+
+******************************************************************************/
 namespace polygon {
 
 bool Polygon_3D::parse(std::istream& is) {
@@ -158,14 +166,6 @@ const projection Polygon_3D::get_projection_for_edge(const std::size_t& i,
     projection proj(i / 2, lambda, proj_x, proj_y, proj_z);
 
     return proj;
-}
-
-const std::size_t Polygon_3D::get_num_projections() {
-    return m_num_projections;
-}
-
-const std::vector<projection> Polygon_3D::get_proj_vec() {
-    return m_proj_vec;
 }
 
 const void Polygon_3D::show_results() {

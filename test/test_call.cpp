@@ -5,7 +5,14 @@
 
 #include <source/polygon_3D/polygon_3D.h>
 
-
+/**
+ * @brief Entry point.
+ *
+ * Execution of the program
+ * starts here.
+ *
+ * @return Program exit status
+ */
 int main() {
     std::string input_filename = "source/test/data/coord.txt";
     std::ifstream is(input_filename); 
