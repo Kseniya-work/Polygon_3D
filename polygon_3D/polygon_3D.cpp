@@ -21,23 +21,13 @@ bool Polygon_3D::parse(std::istream& is) {
         m_x.push_back(_x);
         m_y.push_back(_y);
         m_z.push_back(_z);
-
-        m_edges.push_back(current_point_num++);
-		m_edges.push_back(current_point_num);
     }
 
     if (m_x.size() == 0 && m_y.size() == 0 && m_z.size() == 0) {
         throw std::runtime_error("file with coordinates is empty.");
     }
 
-    if (this->check_closed()) {
-        m_edges.back() = m_edges.front();
-        m_is_closed = true;
-    }
-    else {
-        m_edges.pop_back();
-        m_edges.pop_back();
-    }
+    m_is_closed = this->check_closed() ? true : false;
 
     return true;
 }
@@ -64,7 +54,7 @@ bool Polygon_3D::calc_projections(const double& ix,
     min_dist = sqrt(pow(ix - cur_proj.m_x, 2) + pow(iy - cur_proj.m_y, 2) + pow(iz - cur_proj.m_z, 2));
     min_dist_indices.push_back(i);
 
-    for (std::size_t i = 2; i < m_edges.size(); i += 2) {
+    for (std::size_t i = 1; i < m_x.size() - 1; i++) {
         projection cur_proj = this->get_projection_for_edge(i, ix, iy, iz);
         all_proj.push_back(cur_proj);
         cur_dist = sqrt(pow(ix - cur_proj.m_x, 2) + pow(iy - cur_proj.m_y, 2) + pow(iz - cur_proj.m_z, 2));
@@ -72,17 +62,10 @@ bool Polygon_3D::calc_projections(const double& ix,
         if (cur_dist < min_dist) {
             min_dist = cur_dist;
             min_dist_indices.clear();
-            min_dist_indices.push_back(i / 2);
+            min_dist_indices.push_back(i);
         }
         else if (cur_dist == min_dist) {
-            min_dist_indices.push_back(i / 2);
-        }
-    }
-
-    if (m_is_closed) {
-        all_proj.pop_back();
-        if (min_dist_indices.back() == m_x.size() - 1) {
-            min_dist_indices.pop_back();
+            min_dist_indices.push_back(i);
         }
     }
 
@@ -108,8 +91,8 @@ const projection Polygon_3D::get_projection_for_edge(const std::size_t& i,
     double proj_y;
     double proj_z;
 
-    std::size_t num_point_left = m_edges[i];
-    std::size_t num_point_right = m_edges[i + 1];
+    std::size_t num_point_left = i;
+    std::size_t num_point_right = i + 1;
 
     // coordinates of the left point of the edge
     double xl = m_x[num_point_left];
@@ -163,7 +146,7 @@ const projection Polygon_3D::get_projection_for_edge(const std::size_t& i,
         }
     }
 
-    projection proj(i / 2, lambda, proj_x, proj_y, proj_z);
+    projection proj(i, lambda, proj_x, proj_y, proj_z);
 
     return proj;
 }

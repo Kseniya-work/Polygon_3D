@@ -22,8 +22,7 @@ namespace polygon {
  * @struct projection
  * Structure storing a projection data.
  */
-struct projection
-{
+struct projection {
     /**
      * @brief Default constructor.
      *  Construct a trivial projection.
@@ -42,11 +41,11 @@ struct projection
      * @param y y-coordinate of a projection point
      * @param z z-coordinate of a projection point
      */ 
-    projection(std::size_t num_edge,
-               double param,
-               double x,
-               double y,
-               double z)
+    projection(const std::size_t& num_edge,
+               const double& param,
+               const double& x,
+               const double& y,
+               const double& z)
     : m_num_edge(num_edge), m_param(param), m_x(x), m_y(y), m_z(z)
     {}
 
@@ -94,7 +93,6 @@ class Polygon_3D {
         std::vector<double> m_x;
         std::vector<double> m_y;
         std::vector<double> m_z;
-        std::vector<std::size_t> m_edges;
         bool m_is_closed = false;
         std::size_t m_num_projections = 0;
         std::vector<projection> m_proj_vec;
