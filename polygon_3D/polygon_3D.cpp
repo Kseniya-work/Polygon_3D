@@ -21,6 +21,7 @@ bool Polygon_3D::parse(std::istream& is) {
         m_x.push_back(_x);
         m_y.push_back(_y);
         m_z.push_back(_z);
+        m_points.push_back(point(_x, _y, _z));
     }
 
     if (m_x.size() == 0 && m_y.size() == 0 && m_z.size() == 0) {
