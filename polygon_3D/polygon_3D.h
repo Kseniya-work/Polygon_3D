@@ -16,7 +16,7 @@
 #include <algorithm>
 
 
-namespace polygon {
+namespace geometry {
 
 class point {
     public:
@@ -37,8 +37,8 @@ class point {
          * @param z z-coordinate of a point
          */ 
         point(const double& x,
-            const double& y,
-            const double& z)
+              const double& y,
+              const double& z)
         : m_x(x), m_y(y), m_z(z)
         {}
 
@@ -76,7 +76,7 @@ class vector {
          */
         vector(void) 
         : m_front_point(point(0.0, 0.0, 0.0)),
-        m_back_point(point(0.0, 0.0, 0.0))
+          m_back_point(point(0.0, 0.0, 0.0))
         {}
 
         /**
@@ -87,14 +87,22 @@ class vector {
          * @param back_point back point of a vector
          */ 
         vector(const point& front_point,
-            const point& back_point)
+               const point& back_point)
         : m_front_point(front_point),
-        m_back_point(back_point)
+          m_back_point(back_point)
         {
             m_x = this->dir_x();
             m_y = this->dir_y();
             m_z = this->dir_z();
             m_mod = this->mod();
+        }
+
+        const point get_front_point() {
+            return m_front_point;
+        }
+
+        const point get_back_point() {
+            return m_back_point;
         }
 
         const double get_x() {
@@ -142,10 +150,7 @@ class vector {
         }
 
         double mod() {
-            return sqrt(pow(m_front_point.get_x() - m_back_point.get_x(), 2)
-                        + pow(m_front_point.get_y() - m_back_point.get_y(), 2)
-                        + pow(m_front_point.get_z() - m_back_point.get_z(), 2)
-                    );
+            return sqrt(pow(m_x, 2) + pow(m_y, 2) + pow(m_z, 2));
         }
 
         point m_front_point;
@@ -166,7 +171,7 @@ struct projection {
      *  Construct a trivial projection.
      */
     projection(void) 
-    : m_num_edge(0), m_param(0.0), m_x(0.0), m_y(0.0), m_z(0.0)
+    : m_num_edge(0), m_param(0.0), m_point(point())
     {}
 
     /**
@@ -175,23 +180,17 @@ struct projection {
      *
      * @param num_edge Edge number with a projection
      * @param param Parameter of a projection
-     * @param x x-coordinate of a projection point
-     * @param y y-coordinate of a projection point
-     * @param z z-coordinate of a projection point
+     * @param point Projection point
      */ 
     projection(const std::size_t& num_edge,
                const double& param,
-               const double& x,
-               const double& y,
-               const double& z)
-    : m_num_edge(num_edge), m_param(param), m_x(x), m_y(y), m_z(z)
+               const point& point)
+    : m_num_edge(num_edge), m_param(param), m_point(point)
     {}
 
     std::size_t m_num_edge;
     double m_param;
-    double m_x;
-    double m_y;
-    double m_z;
+    point m_point;
 };
 
 /**
@@ -212,14 +211,10 @@ class Polygon_3D {
        /**
         * Calculate projections of a projected point onto the polygon.
         *
-        * @param ix x-coordinate of a projected point
-        * @param iy y-coordinate of a projected point
-        * @param iz z-coordinate of a projected point
+        * @param ipoint Projected point
         * @return Function exit status
         */
-        bool calc_projections(const double& ix,
-                              const double& iy,
-                              const double& iz);
+        bool calc_projections(const point& ipoint);
 
        /**
         * @brief Show results of projections calculation.
@@ -228,10 +223,6 @@ class Polygon_3D {
         const void show_results();
 
     private:
-        std::vector<double> m_x; // TODO delete
-        std::vector<double> m_y;
-        std::vector<double> m_z;
-
         std::vector<point> m_points;
         bool m_is_closed = false;
         std::size_t m_num_projections = 0;
@@ -248,17 +239,13 @@ class Polygon_3D {
         * Get projection of a projected point onto a current edge.
         *
         * @param i Index of point in polygon
-        * @param ix x-coordinate of a projected point
-        * @param iy y-coordinate of a projected point
-        * @param iz z-coordinate of a projected point
+        * @param ipoint Projected point
         * @return Projection onto a current edge
         */
         const projection get_projection_for_edge(const std::size_t& i,
-                                                 const double& ix,
-                                                 const double& iy,
-                                                 const double& iz);
+                                                 const point& ipoint);
 };
 
-}  // namespace polygon
+}  // namespace geometry
 
 #include <source/polygon_3D/polygon_3D.cpp>

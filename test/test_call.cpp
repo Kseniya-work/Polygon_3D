@@ -44,12 +44,13 @@ int main() {
             );
         }
     }
+    geometry::point ipoint(icoordinates[0], 
+                           icoordinates[1], 
+                           icoordinates[2]);
 
-    polygon::Polygon_3D poly;
+    geometry::Polygon_3D poly;
     poly.parse(is);
-    poly.calc_projections(icoordinates[0], 
-                          icoordinates[1], 
-                          icoordinates[2]);
+    poly.calc_projections(ipoint);
     poly.show_results();
 
     return 0;

@@ -6,7 +6,7 @@
     * Email: knosulko@gmail.com
 
 ******************************************************************************/
-namespace polygon {
+namespace geometry {
 
 bool Polygon_3D::parse(std::istream& is) {
     std::string line = "";
@@ -18,13 +18,10 @@ bool Polygon_3D::parse(std::istream& is) {
         double _x = 0.0, _y = 0.0, _z = 0.0;  // if some coordinate of a point is missing, it will be replaced by zero
         iss >> _x >> _y >> _z;
 
-        m_x.push_back(_x);
-        m_y.push_back(_y);
-        m_z.push_back(_z);
         m_points.push_back(point(_x, _y, _z));
     }
 
-    if (m_x.size() == 0 && m_y.size() == 0 && m_z.size() == 0) {
+    if (m_points.size() == 0) {
         throw std::runtime_error("file with coordinates is empty.");
     }
 
@@ -34,14 +31,10 @@ bool Polygon_3D::parse(std::istream& is) {
 }
 
 const bool Polygon_3D::check_closed() {
-    return (m_x.front() == m_x.back()) &&
-           (m_y.front() == m_y.back()) &&
-           (m_z.front() == m_z.back());
+    return m_points.front() == m_points.back();
 }
 
-bool Polygon_3D::calc_projections(const double& ix,
-                                  const double& iy,
-                                  const double& iz)
+bool Polygon_3D::calc_projections(const point& ipoint)
 {
     double cur_dist;  // distance from point (ix, iy, iz) to the current edge
     double min_dist;  // min distance to edges
@@ -50,15 +43,15 @@ bool Polygon_3D::calc_projections(const double& ix,
 
     // calculate the projection on first edge
     std::size_t i = 0;
-    projection cur_proj = this->get_projection_for_edge(i, ix, iy, iz);
+    projection cur_proj = this->get_projection_for_edge(i, ipoint);
     all_proj.push_back(cur_proj);
-    min_dist = sqrt(pow(ix - cur_proj.m_x, 2) + pow(iy - cur_proj.m_y, 2) + pow(iz - cur_proj.m_z, 2));
+    min_dist = vector(ipoint, cur_proj.m_point).get_mod();
     min_dist_indices.push_back(i);
 
-    for (std::size_t i = 1; i < m_x.size() - 1; i++) {
-        projection cur_proj = this->get_projection_for_edge(i, ix, iy, iz);
+    for (std::size_t i = 1; i < m_points.size() - 1; i++) {
+        projection cur_proj = this->get_projection_for_edge(i, ipoint);
         all_proj.push_back(cur_proj);
-        cur_dist = sqrt(pow(ix - cur_proj.m_x, 2) + pow(iy - cur_proj.m_y, 2) + pow(iz - cur_proj.m_z, 2));
+        cur_dist = vector(ipoint, cur_proj.m_point).get_mod();
 
         if (cur_dist < min_dist) {
             min_dist = cur_dist;
@@ -83,73 +76,34 @@ bool Polygon_3D::calc_projections(const double& ix,
 }
 
 const projection Polygon_3D::get_projection_for_edge(const std::size_t& i,
-                                                     const double& ix,
-                                                     const double& iy,
-                                                     const double& iz)
+                                                     const point& ipoint)
 {
     double lambda;
-    double proj_x;
-    double proj_y;
-    double proj_z;
+    point proj_point;
 
-    std::size_t num_point_left = i;
-    std::size_t num_point_right = i + 1;
+    vector edge(m_points[i], m_points[i + 1]);  // edge vector
 
-    // coordinates of the left point of the edge
-    double xl = m_x[num_point_left];
-    double yl = m_y[num_point_left];
-    double zl = m_z[num_point_left];
-
-    // coordinates of the right point of the edge
-    double xr = m_x[num_point_right];
-    double yr = m_y[num_point_right];
-    double zr = m_z[num_point_right];
-
-    if (xl == xr &&
-        yl == yr &&
-        zl == zr)  // singular edge
-    {
-        lambda = 0;
-        proj_x = xl;
-        proj_y = yl;
-        proj_z = zl;
+    if (edge.get_mod() == 0.0) {  // singular edge
+        lambda = 0.0;
+        proj_point = edge.get_front_point();
     }
     else {
-        // direction vector of edge
-        double dx_edge = xr - xl;
-        double dy_edge = yr - yl;
-        double dz_edge = zr - zl;
-
-        // direction vector of line through points (ix, iy, iz) and (xl, yl, zl)
-        double dx_i = ix - xl;
-        double dy_i = iy - yl;
-        double dz_i = iz - zl;
-
-        lambda = (dx_edge * dx_i + dy_edge * dy_i + dz_edge * dz_i) / 
-                 (pow(dx_edge, 2) + pow(dy_edge, 2) + pow(dz_edge, 2));
-
-        // coordinate of projection point
-        proj_x = dx_edge * lambda + xl;
-        proj_y = dy_edge * lambda + yl;
-        proj_z = dz_edge * lambda + zl;
-
+        vector ivector(m_points[i], ipoint);  // vector of line through points (ix, iy, iz) and (xl, yl, zl)
+        std::pair<double, point> scal_proj_data = edge.scal_proj(ivector);  // parametr and projection point
+        lambda = scal_proj_data.first;
+        proj_point = scal_proj_data.second;
+        
         if (lambda < 0) {
             lambda = 0.0;
-            proj_x = xl;
-            proj_y = yl;
-            proj_z = zl;
+            proj_point = edge.get_front_point();
         }
         else if (lambda > 1) {
             lambda = 1.0;
-            proj_x = xr;
-            proj_y = yr;
-            proj_z = zr;
+            proj_point = edge.get_back_point();
         }
     }
 
-    projection proj(i, lambda, proj_x, proj_y, proj_z);
-
-    return proj;
+    return projection(i, lambda, proj_point);
 }
 
 const void Polygon_3D::show_results() {
@@ -157,15 +111,15 @@ const void Polygon_3D::show_results() {
     oss << "number of solutions: " << m_num_projections << std::endl;
     std::for_each(m_proj_vec.begin(),
                   m_proj_vec.end(),
-                  [&oss](const auto& proj) {
+                  [&oss](auto& proj) {
                       oss << "segment number: " << proj.m_num_edge << ", " <<
                              "projection parameter: " << proj.m_param << ", " <<
-                             "point of projection: (" << proj.m_x << ", " <<
-                                                         proj.m_y << ", " <<
-                                                         proj.m_z << ")" << std::endl; 
+                             "point of projection: (" << proj.m_point.get_x() << ", " <<
+                                                         proj.m_point.get_y() << ", " <<
+                                                         proj.m_point.get_z() << ")" << std::endl; 
                   }
     );
     std::cout << oss.str(); 
 }
 
-} // namespace polygon
+} // namespace geometry
