@@ -18,6 +18,10 @@
 
 namespace geometry {
 
+/**
+ * @class point
+ * Class provides operations with point in 3D space.
+ */
 class point {
     public:
         /**
@@ -42,14 +46,29 @@ class point {
         : m_x(x), m_y(y), m_z(z)
         {}
 
+       /**
+        * Get x-coordinate of a point.
+        *
+        * @return x-coordinate of a point
+        */
         const double get_x() {
             return m_x;
         }
 
+       /**
+        * Get y-coordinate of a point.
+        *
+        * @return y-coordinate of a point
+        */
         const double get_y() {
             return m_y;
         }
 
+       /**
+        * Get z-coordinate of a point.
+        *
+        * @return z-coordinate of a point
+        */
         const double get_z() {
             return m_z;
         }
@@ -62,12 +81,21 @@ class point {
         double m_z;
 };
 
+/**
+* Compare the equality of two points.
+*
+* @return True if equal, else false
+*/
 bool operator==(const point& left, const point& right) {
     return left.m_x == right.m_x &&
            left.m_y == right.m_y &&
            left.m_z == right.m_z;
 }
 
+/**
+ * @class vector
+ * Class provides operations with vector in 3D space.
+ */
 class vector {
     public:
         /**
@@ -97,30 +125,65 @@ class vector {
             m_mod = this->mod();
         }
 
+        /**
+         * Get front point of a vector.
+         *
+         * @return Front point of a vector
+         */
         const point get_front_point() {
             return m_front_point;
         }
 
+        /**
+         * Get back point of a vector.
+         *
+         * @return Back point of a vector
+         */
         const point get_back_point() {
             return m_back_point;
         }
 
+        /**
+         * Get x-coordinate of a vector.
+         *
+         * @return x-coordinate of a vector
+         */
         const double get_x() {
             return m_x;
         }
 
+        /**
+         * Get y-coordinate of a vector.
+         *
+         * @return y-coordinate of a vector
+         */
         const double get_y() {
             return m_y;
         }
 
+        /**
+         * Get z-coordinate of a vector.
+         *
+         * @return z-coordinate of a vector
+         */
         const double get_z() {
             return m_z;
         }
 
+        /**
+         * Get modulus of a vector.
+         *
+         * @return Modulus of a vector
+         */
         const double get_mod() {
             return m_mod;
         }
 
+        /**
+         * Calculate the scalar projection of an input vector to a current one.
+         *
+         * @return Pair of a projection parameter and a projection point
+         */
         const std::pair<double, point> scal_proj(const vector& ivec) {
             double lambda = this->prod(ivec) / m_mod;
             point proj_point(m_front_point.get_x() + lambda * m_x,
@@ -130,6 +193,11 @@ class vector {
             return std::make_pair(lambda, proj_point);
         }
 
+        /**
+         * Calculate a product of an input vector and a current one.
+         *
+         * @return Product of vectors
+         */
         const double prod(const vector& ivec) {
             return ivec.m_x * m_x
                    + ivec.m_y * m_y
@@ -137,18 +205,38 @@ class vector {
         }
 
     private:
+        /**
+         * Calculate x-coordinate of a vector.
+         *
+         * @return x-coordinate of a vector
+         */
         double dir_x() {
             return m_back_point.get_x() - m_front_point.get_x();
         }
 
+        /**
+         * Calculate y-coordinate of a vector.
+         *
+         * @return y-coordinate of a vector
+         */
         double dir_y() {
             return m_back_point.get_y() - m_front_point.get_y();
         }
 
+        /**
+         * Calculate z-coordinate of a vector.
+         *
+         * @return z-coordinate of a vector
+         */
         double dir_z() {
             return m_back_point.get_z() - m_front_point.get_z();
         }
 
+        /**
+         * Calculate a modulus of a vector.
+         *
+         * @return Modulus of a vector
+         */
         double mod() {
             return sqrt(pow(m_x, 2) + pow(m_y, 2) + pow(m_z, 2));
         }
